@@ -106,3 +106,14 @@ class Node(Node_Graphics):
             for connection in pin.connections:
                 connection._do_highlight = value
                 connection.update_path()
+
+    def load(self, data):
+        self.setPos(data["x"], data["y"])
+
+    def save(self):
+        pos = self.pos().toPoint()
+        x, y = pos.x(), pos.y()
+        
+
+        data = {"x": x, "y": y}
+        return data

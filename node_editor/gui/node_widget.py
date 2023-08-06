@@ -85,7 +85,7 @@ class NodeWidget(QtWidgets.QWidget):
                 node_item = info["class"]()
                 node_item.uuid = node["uuid"]
                 self.scene.addItem(node_item)
-                node_item.setPos(node["x"], node["y"])
+                node_item.load(node)
 
                 self.node_lookup[node["uuid"]] = node_item
 
@@ -142,17 +142,11 @@ class NodeWidget(QtWidgets.QWidget):
 
             # Nodes
             if isinstance(item, Node):
-                # print("found node")
-                pos = item.pos().toPoint()
-                x, y = pos.x(), pos.y()
-                # print(f"pos: {x, y}")
-
                 obj_type = type(item).__name__
-                # print(f"node type: {obj_type}")
-
                 node_id = str(item.uuid)
+                node = {"type": obj_type, "uuid": node_id}
 
-                node = {"type": obj_type, "x": x, "y": y, "uuid": node_id}
+                node.update(item.save())
                 scene["nodes"].append(node)
 
         # Write the items_info dictionary to a JSON file
