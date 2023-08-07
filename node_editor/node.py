@@ -44,10 +44,9 @@ class Node(Node_Graphics):
         Returns:
             None
         """
-
-        to_delete = [pin.connection for pin in self._pins if pin.connection]
-        for connection in to_delete:
-            connection.delete()
+        for pin in self._pins:
+            for connection in pin.connections:
+                connection.delete()
 
         self.scene().removeItem(self)
 
@@ -78,6 +77,16 @@ class Node(Node_Graphics):
 
         self._pins.append(pin)
 
+    def output_pins(self):
+        for pin in self._pins:
+            if pin.is_output:
+                yield pin
+
+    def input_pins(self):
+            for pin in self._pins:
+                if not pin.is_output:
+                    yield pin
+
     def select_connections(self, value):
         """
         Sets the highlighting of all connected pins to the specified value.
@@ -94,6 +103,6 @@ class Node(Node_Graphics):
         """
 
         for pin in self._pins:
-            if pin.connection:
-                pin.connection._do_highlight = value
-                pin.connection.update_path()
+            for connection in pin.connections:
+                connection._do_highlight = value
+                connection.update_path()

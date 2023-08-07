@@ -97,7 +97,7 @@ class NodeWidget(QtWidgets.QWidget):
             start_pin = self.node_lookup[c["start_id"]].get_pin(c["start_pin"])
             end_pin = self.node_lookup[c["end_id"]].get_pin(c["end_pin"])
 
-            print("start_pin", start_pin)
+            # print("start_pin", start_pin)
 
             if start_pin:
                 connection.set_start_pin(start_pin)
@@ -119,10 +119,11 @@ class NodeWidget(QtWidgets.QWidget):
             if isinstance(item, Connection):
                 # print(f"Name: {item}")
                 nodes = item.nodes()
+                if(len(nodes) < 2): continue
                 start_id = str(nodes[0].uuid)
                 end_id = str(nodes[1].uuid)
-                start_pin = item.start_pin.name()
-                end_pin = item.end_pin.name()
+                start_pin = item.start_pin.name
+                end_pin = item.end_pin.name
                 # print(f"Node ids {start_id, end_id}")
                 # print(f"connected ports {item.start_pin.name(), item.end_pin.name()}")
 

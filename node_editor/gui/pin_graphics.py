@@ -79,7 +79,8 @@ class Pin_Graphics(QtWidgets.QGraphicsPathItem):
             painter.drawPath(self.text_path)
 
     def itemChange(self, change, value):
-        if change == QtWidgets.QGraphicsItem.ItemScenePositionHasChanged and self.connection:
-            self.connection.update_start_and_end_pos()
+        if change == QtWidgets.QGraphicsItem.ItemScenePositionHasChanged:
+            for connection in self.connections:
+                connection.update_start_and_end_pos()
 
         return value

@@ -34,6 +34,8 @@ class Connection_Graphics(QtWidgets.QGraphicsPathItem):
         self.setPen(QtGui.QPen(QtGui.QColor(200, 200, 200), 2))
         self.setBrush(QtCore.Qt.NoBrush)
         self.setZValue(-1)
+        self.color = QtGui.QColor(0, 128, 255)
+        self.thickness = 0
 
         self.start_pos = QtCore.QPointF()
         self.end_pos = QtCore.QPointF()
@@ -68,8 +70,8 @@ class Connection_Graphics(QtWidgets.QGraphicsPathItem):
         widget (QWidget): The widget used to paint the Connection.
         """
 
-        thickness = 0
-        color = QtGui.QColor(0, 128, 255)
+        thickness = self.thickness
+        color = self.color
         if self.start_pin:
             if self.start_pin.execution:
                 thickness = 3

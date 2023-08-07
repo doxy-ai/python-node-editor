@@ -8,25 +8,69 @@ class Connection(Connection_Graphics):
         self.start_pin = None
         self.end_pin = None
 
+    def pins(self):
+        """
+        Returns a tuple of the two connected pins.
+
+        Returns:
+        tuple: A tuple of the two Pin objects connected by this Connection.
+        """
+        def impl(self):
+            for pin in (self.start_pin, self.end_pin):
+                if pin is not None:
+                    yield pin
+        return tuple(impl(self))
+        
+
+    def other_pin(self, otherPin):
+        """
+        Given a pin in this connection returns the other pin
+
+        Returns:
+        pin: The other pin
+        """
+        for pin in self.pins():
+            if pin != otherPin:
+                return pin
+        return None
+
+    def disconnect_start_pin(self):
+        if self.start_pin is not None:
+            self.start_pin.on_disconnected(self)
+            self.start_pin.connections.remove(self)
+        self.start_pin = None
+
+    def disconnect_end_pin(self, eventAlreadyCalled = False):
+        if self.end_pin is not None:
+            if not eventAlreadyCalled:
+                self.end_pin.on_disconnected(self)
+            self.end_pin.connections.remove(self)
+        self.end_pin = None
+
     def delete(self):
         """
         Deletes the connection and removes it from the scene and any connected pins.
         """
-        for pin in (self.start_pin, self.end_pin):
-            if pin:
-                pin.connection = None
-            pin = None
+        if self.end_pin is not None: 
+            self.end_pin.on_disconnected(self)
+        self.disconnect_start_pin()
+        self.disconnect_end_pin(True) # When we disconnect specify that we don't want to fire the disconnect event a second time!
 
         self.scene().removeItem(self)
 
     def set_start_pin(self, pin):
+        self.disconnect_start_pin()
         self.start_pin = pin
-        self.start_pin.connection = self
+        self.start_pin.connections.append(self)
+        self.start_pin.on_connected(self)
 
     def set_end_pin(self, pin):
+        self.disconnect_end_pin()
         self.end_pin = pin
-        self.end_pin.connection = self
+        self.end_pin.connections.append(self)
+        self.end_pin.on_connected(self)
 
+    
     def nodes(self):
         """
         Returns a tuple of the two connected nodes.
@@ -34,7 +78,13 @@ class Connection(Connection_Graphics):
         Returns:
         tuple: A tuple of the two Node objects connected by this Connection.
         """
-        return (self.start_pin.node(), self.end_pin.node())
+        def impl(self):
+            for pin in self.pins():
+                if pin:
+                    yield pin.node
+        # return (self.start_pin.node, self.end_pin.node)
+
+        return tuple(impl(self))
 
     def update_start_and_end_pos(self):
         """

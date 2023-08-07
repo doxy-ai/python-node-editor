@@ -7,7 +7,9 @@ class Pin(Pin_Graphics):
 
         self.name = None
         self.node = None
-        self.connection = None
+        # self.connection = None
+        self.connections = []
+        self.max_connections = 1
 
     def set_execution(self, execution):
         self.execution = execution
@@ -17,9 +19,26 @@ class Pin(Pin_Graphics):
         self.name = name
         super().set_name(name)
 
-    def clear_connection(self):
-        if self.connection:
-            self.connection.delete()
+    # def clear_connection(self):
+    def clear_connections(self):
+        if len(self.connections) > 0:
+            for connection in self.connections:
+                connection.delete()
+        connections = []
+
+    # Called when a new pin is connected
+    def on_connected(self, connection):
+        pass
+
+    # Called when a new pin is disconnected
+    def on_disconnected(self, connection):
+        pass
+
+    def all_connected_pins(self):
+        for connection in self.connections:
+            for pin in connection.pins():
+                if pin != self:
+                    yield pin
 
     def can_connect_to(self, pin):
         if not pin:
@@ -27,10 +46,18 @@ class Pin(Pin_Graphics):
         if pin.node == self.node:
             return False
 
+        # If either pin can't accept any more connections... false
+        if len(self.connections) > self.max_connections - 1\
+          or len(pin.connections) > pin.max_connections - 1:
+            return False
+        # If we are already connected to this pin... false
+        if pin in self.all_connected_pins():
+            return False
+
         return self.is_output != pin.is_output
 
     def is_connected(self):
-        return bool(self.connection)
+        return bool(len(self.connections) > 0)
 
     def get_data(self):
         # Get a list of nodes in the order to be computed. Forward evaluation by default.

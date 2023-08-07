@@ -87,9 +87,14 @@ class NodeEditor(QtCore.QObject):
                     return True
 
                 if isinstance(item, Connection):
-                    self.connection = Connection(None)
+                    # self.connection = Connection(None)
+                    # self.connection.start_pos = item.start_pos
+                    # self.scene.addItem(self.connection)
+                    # self.port = item.start_pin
+                    # self.connection.end_pos = event.scenePos()
+                    # self.connection.update_start_and_end_pos()  # to fix the offset
+                    self.connection = item
                     self.connection.start_pos = item.start_pos
-                    self.scene.addItem(self.connection)
                     self.port = item.start_pin
                     self.connection.end_pos = event.scenePos()
                     self.connection.update_start_and_end_pos()  # to fix the offset
@@ -134,12 +139,12 @@ class NodeEditor(QtCore.QObject):
                         # print("Making connection")
 
                         # delete existing connection on the new port
-                        if item.connection:
-                            item.connection.delete()
+                        # if item.connection:
+                        #     item.connection.delete()
 
                         # delete existing connection to the original port
-                        self.port.clear_connection()
-                        item.clear_connection()
+                        # self.port.clear_connection()
+                        # item.clear_connection()
 
                         self.connection.set_start_pin(self.port)
                         self.connection.set_end_pin(item)
