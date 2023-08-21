@@ -9,6 +9,7 @@ class Pin_Graphics(QtWidgets.QGraphicsPathItem):
         self.margin = 2
 
         self.execution = False
+        self.execution_show_text = False
 
         path = QtGui.QPainterPath()
 
@@ -40,9 +41,11 @@ class Pin_Graphics(QtWidgets.QGraphicsPathItem):
             points.append(QtCore.QPointF(-6, -7))
             path.addPolygon(QtGui.QPolygonF(points))
             self.setPath(path)
+        self.execution = execution
 
     def set_name(self, name):
-        nice_name = self.name.replace("_", " ").title()
+        self.name = name
+        nice_name = self.name.replace("_", " ").title() + " "
         self.pin_text_width = self.font_metrics.horizontalAdvance(nice_name)
 
         if self.is_output:
@@ -73,7 +76,7 @@ class Pin_Graphics(QtWidgets.QGraphicsPathItem):
 
         # Draw text
 
-        if not self.execution:
+        if not self.execution or self.execution_show_text:
             painter.setPen(QtCore.Qt.NoPen)
             painter.setBrush(QtCore.Qt.white)
             painter.drawPath(self.text_path)

@@ -3,6 +3,8 @@ from PySide6.QtCore import Qt
 
 from node_editor.common import Node_Status
 
+from itertools import zip_longest
+
 
 class Node_Graphics(QtWidgets.QGraphicsItem):
     def __init__(self):
@@ -142,19 +144,32 @@ class Node_Graphics(QtWidgets.QGraphicsItem):
 
         pin_dim = None
         # Add the heigth for each of the pins
-        exec_height_added = False
-        for pin in self._pins:
-            pin_dim = {
-                "w": QtGui.QFontMetrics(pin_font).horizontalAdvance(pin.name),
-                "h": QtGui.QFontMetrics(pin_font).height(),
-            }
+        pin_height = QtGui.QFontMetrics(pin_font).height()
 
-            if pin_dim["w"] > total_width:
-                total_width = pin_dim["w"]
+        def pins(self, input, execution):
+            for pin in self.input_pins() if input else self.output_pins():
+                if pin.execution if execution else not pin.execution:
+                    yield pin
+        for (inPin, outPin) in zip_longest(pins(self, True, True), pins(self, False, True), fillvalue=None):
+            in_pin_dim_width = 0 if inPin is None else QtGui.QFontMetrics(pin_font).horizontalAdvance(inPin.name)
+            if inPin and not inPin.execution_show_text: in_pin_dim_width = 0
+            out_pin_dim_width = 0 if outPin is None else QtGui.QFontMetrics(pin_font).horizontalAdvance(outPin.name)
+            if outPin and not outPin.execution_show_text: out_pin_dim_width = 0
 
-            if pin.execution and not exec_height_added or not pin.execution:
-                total_height += pin_dim["h"]
-                exec_height_added = True
+            total_width = max(total_width, in_pin_dim_width + out_pin_dim_width)
+
+            # if pin.execution and not exec_height_added or not pin.execution:
+            total_height += pin_height
+                # exec_height_added = True
+        for (inPin, outPin) in zip_longest(pins(self, True, False), pins(self, False, False), fillvalue=None):
+            in_pin_dim_width = 0 if inPin is None else QtGui.QFontMetrics(pin_font).horizontalAdvance(inPin.name)
+            out_pin_dim_width = 0 if outPin is None else QtGui.QFontMetrics(pin_font).horizontalAdvance(outPin.name)
+
+            total_width = max(total_width, in_pin_dim_width, out_pin_dim_width)
+
+            # 
+            total_height += ((0 if inPin is None else 1) + (0 if outPin is None else 1)) * pin_height
+                # exec_height_added = True
 
         # Add the margin to the total_width
         total_width += self.horizontal_margin
@@ -195,32 +210,36 @@ class Node_Graphics(QtWidgets.QGraphicsItem):
         )
 
         # Position the pins. Execution pins stay on the same row
-        if pin_dim:
+        if len(self._pins) > 0:
             # y = (-total_height / 2) + title_dim["h"] + title_type_dim["h"] + 5
             y = bg_height - total_height / 2 - 10
+            inY = y
+            outY = y
 
             # Do the execution pins
-            exe_shifted = False
+            exe_shifted = 0
             for pin in self._pins:
                 if not pin.execution:
                     continue
-                if not exe_shifted:
-                    y += pin_dim["h"]
-                    exe_shifted = True
                 if pin.is_output:
-                    pin.setPos(total_width / 2 - 10, y)
+                    outY += pin_height
+                    pin.setPos(total_width / 2 - 10, outY)
                 else:
-                    pin.setPos(-total_width / 2 + 10, y)
+                    inY += pin_height
+                    pin.setPos(-total_width / 2 + 10, inY)
+            
+            y = max(inY, outY)
 
             # Do the rest of the pins
             for pin in self._pins:
                 if pin.execution:
                     continue
-                y += pin_dim["h"]
 
                 if pin.is_output:
+                    y += pin_height
                     pin.setPos(total_width / 2 - 10, y)
                 else:
+                    y += pin_height
                     pin.setPos(-total_width / 2 + 10, y)
 
         self._width = total_width
