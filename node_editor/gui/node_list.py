@@ -10,8 +10,9 @@ class NodeList(QtWidgets.QListWidget):
         self.setDragEnabled(True)  # enable dragging
 
     def update_project(self, imports):
-        # make an item for each custom  class
+        self.clear()
 
+        # make an item for each custom  class
         for name, data in imports.items():
             name = name.replace("_Node", "")
 
